@@ -1,6 +1,6 @@
 # Heart Disease Prediction
 
-This project utilizes machine learning techniques to predict the likelihood of heart disease in patients based on various medical attributes.
+The dataset is attached herewith GIT repository as well. This project utilizes machine learning techniques to predict the likelihood of heart disease in patients based on various medical attributes.
 
 ## Overview
 
