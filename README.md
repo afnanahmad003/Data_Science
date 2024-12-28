@@ -10,35 +10,6 @@ Heart disease is a leading cause of mortality worldwide. Early detection through
 
 The dataset used in this project includes several medical attributes such as age, sex, chest pain type, resting blood pressure, serum cholesterol, fasting blood sugar, resting electrocardiographic results, maximum heart rate achieved, exercise-induced angina, ST depression induced by exercise, slope of the peak exercise ST segment, number of major vessels colored by fluoroscopy, and thalassemia.
 
-## Features
-
-- **Age**: Age of the patient
-- **Sex**: Gender of the patient (1 = male; 0 = female)
-- **Chest Pain Type (cp)**:
-  - 0: Typical angina
-  - 1: Atypical angina
-  - 2: Non-anginal pain
-  - 3: Asymptomatic
-- **Resting Blood Pressure (trestbps)**: Resting blood pressure (in mm Hg)
-- **Serum Cholesterol (chol)**: Serum cholesterol in mg/dl
-- **Fasting Blood Sugar (fbs)**: Fasting blood sugar > 120 mg/dl (1 = true; 0 = false)
-- **Resting Electrocardiographic Results (restecg)**:
-  - 0: Normal
-  - 1: Having ST-T wave abnormality
-  - 2: Showing probable or definite left ventricular hypertrophy
-- **Maximum Heart Rate Achieved (thalach)**: Maximum heart rate achieved
-- **Exercise-Induced Angina (exang)**: Exercise-induced angina (1 = yes; 0 = no)
-- **ST Depression Induced by Exercise (oldpeak)**: ST depression induced by exercise relative to rest
-- **Slope of the Peak Exercise ST Segment (slope)**:
-  - 0: Upsloping
-  - 1: Flat
-  - 2: Downsloping
-- **Number of Major Vessels (ca)**: Number of major vessels (0-3) colored by fluoroscopy
-- **Thalassemia (thal)**:
-  - 1: Normal
-  - 2: Fixed defect
-  - 3: Reversible defect
-
 ## Methodology
 
 1. **Data Preprocessing**:
