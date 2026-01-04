@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Graph Query Processing - Simple Guide</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(to bottom right, #f9fafb, #f3f4f6); min-height: 100vh; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+        .slide { background: white; border-radius: 1rem; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); padding: 2rem; margin-bottom: 2rem; display: none; }
+        .slide.active { display: block; }
+        .slide h1 { font-size: 2rem; font-weight: bold; color: #1f2937; margin-bottom: 0.5rem; }
+        .slide h2 { font-size: 1.25rem; color: #6b7280; margin-bottom: 1.5rem; }
+        .content { font-size: 1rem; line-height: 1.6; color: #374151; }
+        .content p { margin-bottom: 1rem; }
+        .box { padding: 1rem; border-radius: 0.5rem; margin: 1rem 0; }
+        .box-blue { background-color: #eff6ff; }
+        .box-yellow { background-color: #fefce8; }
+        .box-green { background-color: #f0fdf4; }
+        .box-purple { background-color: #faf5ff; }
+        .box-orange { background-color: #fff7ed; }
+        .box-pink { background-color: #fdf2f8; }
+        .box-indigo { background-color: #eef2ff; }
+        .box-teal { background-color: #f0fdfa; }
+        .box-amber { background-color: #fffbeb; }
+        .box-cyan { background-color: #ecfeff; }
+        .box-rose { background-color: #fff1f2; }
+        .box-red { background-color: #fef2f2; }
+        .box-gradient { background: linear-gradient(to right, #eff6ff, #faf5ff); }
+        .box-gradient2 { background: linear-gradient(to right, #faf5ff, #fdf2f8); }
+        .font-semibold { font-weight: 600; display: block; margin-bottom: 0.5rem; }
+        .text-sm { font-size: 0.875rem; }
+        .text-lg { font-size: 1.125rem; }
+        .text-xl { font-size: 1.25rem; }
+        .italic { font-style: italic; }
+        .controls { background: white; border-top: 1px solid #e5e7eb; padding: 1rem; position: fixed; bottom: 0; left: 0; right: 0; }
+        .controls-inner { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+        .btn { padding: 0.5rem 1rem; border-radius: 0.5rem; border: none; cursor: pointer; font-size: 1rem; transition: all 0.2s; }
+        .btn-blue { background-color: #3b82f6; color: white; }
+        .btn-blue:hover:not(:disabled) { background-color: #2563eb; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .slide-counter { color: #6b7280; font-weight: 500; }
+        @media print { .controls { display: none; } .slide { display: block !important; page-break-after: always; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        
+        <div class="slide active" data-slide="0">
+          <h1>Graph Query Processing</h1>
+          <h2>A Survey of Techniques and Methods</h2>
+          <div class="content">
+            <p class=" text-xl">Understanding how we search and find information in connected data</p><div class="box box-blue"><p class=" font-semibold">Real-world analogy:</p><p class="">Think of it like searching through Facebook to find all your friends who work at Google and live in San Francisco</p></div>
+          </div>
+        </div>
+        <div class="slide " data-slide="1">
+          <h1>What is a Graph?</h1>
+          
+          <div class="content">
+            <p class=" text-lg">A graph is a way to show things (nodes) and how they connect (edges)</p><div class="box box-yellow"><p class=" font-semibold">Simple Example:</p><p class="">• People = Nodes</p><p class="">• Friendships = Edges</p><p class="">John ←→ Sarah ←→ Mike</p><p class=" text-sm italic">This shows John is friends with Sarah, and Sarah is friends with Mike</p></div>
+          </div>
+        </div>
+        <div class="slide " data-slide="2">
+          <h1>Graph vs Subgraph</h1>
+          
+          <div class="content">
+            <div class="box box-green"><p class=" font-semibold">Imagine a family tree:</p><p class="">• Full Graph = Your entire family (grandparents, parents, siblings, cousins)</p><p class="">• Subgraph = Just you and your siblings</p><p class=" text-sm italic">A subgraph is a smaller piece of a bigger graph</p></div><div class="box box-purple"><p class=" font-semibold">Isomorphic Graphs:</p><p class="">Two graphs that look different but have the same structure</p><p class=" text-sm">Like two different seating arrangements of the same 5 people around a table</p></div>
+          </div>
+        </div>
+        <div class="slide " data-slide="3">
+          <h1>Types of Graph Databases</h1>
+          
+          <div class="content">
+            <div class="box box-blue"><p class=" font-semibold">1. Single Graph Database:</p><p class="">One big connected network</p><p class=" text-sm"><strong class="">Example:</strong> All of Facebook - everyone is connected in one giant graph</p></div><div class="box box-orange"><p class=" font-semibold">2. Transactional Graph Database:</p><p class="">Many separate small graphs</p><p class=" text-sm"><strong class="">Example:</strong> A chemistry database where each molecule is its own separate graph</p></div>
+          </div>
+        </div>
+        <div class="slide " data-slide="4">
+          <h1>What is Graph Query Processing?</h1>
+          
+          <div class="content">
+            <p class=" text-lg">Finding patterns or specific structures in graph data</p><div class="box box-pink"><p class=" font-semibold">Real-life Example:</p><p class="">You want to find: "All people who are friends with both Alice AND Bob"</p><p class=" text-sm">The challenge: How to search through millions of connections quickly without checking every single person one by one?</p></div><div class="box box-indigo"><p class=" font-semibold">The Problem:</p><p class="">Checking every possible connection is extremely slow (like reading every page in a library to find one book)</p></div>
+          </div>
+        </div>
+        <div class="slide " data-slide="5">
+          <h1>The Indexing Solution</h1>
+          
+          <div class="content">
+            <p class=" text-lg">Create shortcuts to find information faster</p><div class="box box-teal"><p class=" font-semibold">Library Analogy:</p><p class="">❌ <strong class="">Without Index:</strong> Walk through every shelf and check every book</p><p class="">✅ <strong class="">With Index:</strong> Use the card catalog to jump directly to the right section</p></div><div class="box box-amber"><p class=" font-semibold">In Graphs:</p><p class="">Instead of checking all connections, we pre-organize the data so we can quickly eliminate large portions that don't match what we're looking for</p></div>
+          </div>
+        </div>
+        <div class="slide " data-slide="6">
+          <h1>Non-Mining Based Indexing</h1>
+          <h2>Index Everything Approach</h2>
+          <div class="content">
+            <p class=" text-lg">Store information about all structures in the database</p><div class="box box-blue"><p class=" font-semibold">Like a Phone Book:</p><p class="">• Lists EVERYONE in the city</p><p class="">• Easy to update when someone moves</p><p class="">• But takes forever to find "all plumbers in downtown"</p></div><div class="box box-red"><p class=" font-semibold">Downside:</p><p class="">Not very smart - doesn't prioritize important patterns</p></div>
+          </div>
+        </div>
+        <div class="slide " data-slide="7">
+          <h1>GraphGrep Technique</h1>
+          <h2>Path-Based Indexing</h2>
+          <div class="content">
+            <p class=" text-lg">Stores all possible paths up to a certain length</p><div class="box box-purple"><p class=" font-semibold">Road Trip Example:</p><p class="">Imagine recording all possible driving routes between cities up to 3 stops:</p><p class="">• NYC → Boston → Portland</p><p class="">• LA → Vegas → Phoenix</p><p class="">• Miami → Atlanta → Nashville</p><p class=" text-sm italic">When someone asks "How do I get from Boston to Portland?" you already have it stored</p></div><div class="box box-yellow"><p class=" text-sm"><strong class="">Problem:</strong> Good for small maps, but imagine storing every possible 3-step route in the entire USA - too much data!</p></div>
+          </div>
+        </div>
+        <div class="slide " data-slide="8">
+          <h1>GD-Index Technique</h1>
+          
+          <div class="content">
+            <p class=" text-lg">Breaks big graphs into smaller connected pieces</p><div class="box box-green"><p class=" font-semibold">Puzzle Analogy:</p><p class="">Take a 1000-piece jigsaw puzzle and organize it:</p><p class="">• First by corner pieces</p><p class="">• Then edge pieces</p><p class="">• Then by color groups</p><p class=" text-sm italic">This creates a hierarchy - when looking for a blue sky piece, you only check the blue section</p></div><div class="box box-orange"><p class=" text-sm"><strong class="">Best for:</strong> Small to medium puzzles. Gets overwhelming with giant puzzles.</p></div>
+          </div>
+        </div>
+        <div class="slide " data-slide="9">
+          <h1>GString Technique</h1>
+          
+          <div class="content">
+            <p class=" text-lg">Identifies basic building block shapes in graphs</p><div class="box box-cyan"><p class=" font-semibold">LEGO Blocks Example:</p><p class="">Instead of describing a LEGO castle piece by piece, you identify standard blocks:</p><p class="">• Line: 4 blocks in a row</p><p class="">• Star: 1 center block with 4 blocks attached</p><p class="">• Cycle: Blocks forming a closed loop</p><p class=" text-sm italic">Now you can say "Find me all castles with a star pattern" much faster</p></div><div class="box box-pink"><p class=" text-sm"><strong class="">Limitation:</strong> Only works well for chemistry/molecules. Not great for social networks.</p></div>
+          </div>
+        </div>
+        <div class="slide " data-slide="10">
+          <h1>GraphREL Technique</h1>
+          
+          <div class="content">
+            <p class=" text-lg">Converts graphs into database tables</p><div class="box box-indigo"><p class=" font-semibold">Spreadsheet Example:</p><p class="">Convert your social network into Excel:</p><p class="">• Table 1: People (ID, Name, Age)</p><p class="">• Table 2: Friendships (Person1, Person2)</p><p class=" text-sm italic">Now you can use familiar database tools (like SQL) to search</p></div><div class="box box-yellow"><p class=" text-sm"><strong class="">Problem:</strong> Finding "friends of friends of friends" requires joining many tables together, which becomes very slow</p></div>
+          </div>
+        </div>
+        <div class="slide " data-slide="11">
+          <h1>Mining-Based Indexing</h1>
+          <h2>Smart Pattern Recognition</h2>
+          <div class="content">
+            <p class=" text-lg">Only index patterns that appear frequently</p><div class="box box-teal"><p class=" font-semibold">Shopping Mall Example:</p><p class="">Instead of mapping every possible route through the mall:</p><p class="">• Find the top 10 most-walked paths</p><p class="">• Only create maps for those popular routes</p><p class="">• "80% of shoppers go: Entrance → Food Court → Apple Store"</p><p class=" text-sm italic">Save memory by only storing what matters most</p></div><div class="box box-green"><p class=" font-semibold">Advantage:</p><p class="">Much faster and more efficient for common searches</p></div>
+          </div>
+        </div>
+        <div class="slide " data-slide="12">
+          <h1>GIndex Technique</h1>
+          
+          <div class="content">
+            <p class=" text-lg">Indexes only frequently occurring subgraphs</p><div class="box box-purple"><p class=" font-semibold">Restaurant Menu Example:</p><p class="">A restaurant notices patterns:</p><p class="">• 70% of customers order: Burger + Fries + Coke</p><p class="">• 50% order: Pizza + Beer</p><p class="">• Only 2% order: Salad + Water + Soup</p><p class=" text-sm italic">They create "combo meals" for the popular patterns only. This makes ordering faster for most people.</p></div><div class="box box-blue"><p class=" text-sm"><strong class="">Smart:</strong> If someone orders the rare combination, it takes longer but most queries are super fast</p></div>
+          </div>
+        </div>
+        <div class="slide " data-slide="13">
+          <h1>Tree+Delta Technique</h1>
+          
+          <div class="content">
+            <p class=" text-lg">Uses tree structures (simpler than graphs) as index</p><div class="box box-amber"><p class=" font-semibold">Company Org Chart Example:</p><p class="">Instead of mapping all possible relationships:</p><p class="">• CEO → VPs → Directors → Managers → Employees</p><p class="">• This tree structure is much simpler</p><p class="">• Finding "all reports under a VP" is easy</p><p class=" text-sm italic">Trees don't have loops or complex connections, making them faster to search</p></div><div class="box box-green"><p class=" text-sm"><strong class="">Perfect for:</strong> Hierarchical data like organizations, file systems, RNA molecules</p></div>
+          </div>
+        </div>
+        <div class="slide " data-slide="14">
+          <h1>FG-Index Technique</h1>
+          
+          <div class="content">
+            <p class=" text-lg">Creates an inverted index of frequent closed patterns</p><div class="box box-rose"><p class=" font-semibold">Book Index Example:</p><p class="">Like the index at the back of a textbook:</p><p class="">• "DNA" → pages 45, 78, 102, 234</p><p class="">• "Proteins" → pages 89, 102, 156</p><p class="">• "Cell Division" → pages 12, 67, 234</p><p class=" text-sm italic">When you search for "DNA and Proteins together" you can quickly see they both appear on page 102</p></div><div class="box box-indigo"><p class=" text-sm"><strong class="">Super fast</strong> when your search matches an indexed pattern. Slower if you search for something unusual.</p></div>
+          </div>
+        </div>
+        <div class="slide " data-slide="15">
+          <h1>Similarity Search Methods</h1>
+          <h2>Finding 'Close Enough' Matches</h2>
+          <div class="content">
+            <p class=" text-lg">Sometimes exact matches aren't possible or necessary</p><div class="box box-cyan"><p class=" font-semibold">Dating App Example:</p><p class="">You want to find someone:</p><p class="">• Age: 25-30 (not exactly 27)</p><p class="">• Likes: hiking, reading, cooking</p><p class="">• Lives: within 20 miles</p><p class=" text-sm italic">You don't need a PERFECT match - someone who's 31 and lives 22 miles away might be great too!</p></div><div class="box box-yellow"><p class=" font-semibold">Why use it:</p><p class="">• Data might be incomplete or messy</p><p class="">• "Close enough" is good enough</p><p class="">• Much faster than finding perfect matches</p></div>
+          </div>
+        </div>
+        <div class="slide " data-slide="16">
+          <h1>K-NNs and Range Queries</h1>
+          
+          <div class="content">
+            <div class="box box-blue"><p class=" font-semibold">K-NNs (K-Nearest Neighbors):</p><p class="">"Find me the 5 closest matches"</p><p class=" text-sm italic">Like Netflix saying "Here are your top 5 recommended movies"</p></div><div class="box box-green"><p class=" font-semibold">Range Query:</p><p class="">"Find everything within a certain similarity score"</p><p class=" text-sm italic">Like Zillow showing "All houses between $300K-$400K in your neighborhood"</p></div><div class="box box-purple"><p class=" text-sm"><strong class="">Difference:</strong> K-NNs gives you a fixed number of results. Range query gives you ALL results that meet your criteria (could be 3, could be 300)</p></div>
+          </div>
+        </div>
+        <div class="slide " data-slide="17">
+          <h1>Edit Distance & MCS Distance</h1>
+          
+          <div class="content">
+            <div class="box box-orange"><p class=" font-semibold">Edit Distance:</p><p class="">How many changes to transform one graph into another?</p><p class=" text-sm italic">Like spell check: "cat" → "car" = 1 change (t→r)</p><p class=" text-sm">In graphs: Add/remove people or friendships</p></div><div class="box box-teal"><p class=" font-semibold">MCS (Maximum Common Subgraph) Distance:</p><p class="">How much do two graphs overlap?</p><p class=" text-sm italic">Like comparing two friend groups: "You and Sarah have 8 mutual friends out of 20 total"</p><p class=" text-sm">Higher overlap = more similar graphs</p></div>
+          </div>
+        </div>
+        <div class="slide " data-slide="18">
+          <h1>Grafil Method</h1>
+          
+          <div class="content">
+            <p class=" text-lg">Uses features to quickly filter out non-matching graphs</p><div class="box box-pink"><p class=" font-semibold">Job Application Screening:</p><p class="">Company gets 1000 applications. Quick filters:</p><p class="">• Must have 4+ years experience ✓</p><p class="">• Must know Python ✓</p><p class="">• Must have degree in CS ✓</p><p class="">1000 applications → 50 candidates</p><p class=" text-sm italic">Only those 50 get detailed review. Grafil does the same with graphs - quickly eliminates obvious non-matches</p></div>
+          </div>
+        </div>
+        <div class="slide " data-slide="19">
+          <h1>G-Hash Method</h1>
+          
+          <div class="content">
+            <p class=" text-lg">Uses hash tables for super-fast lookup</p><div class="box box-indigo"><p class=" font-semibold">Warehouse Example:</p><p class="">Traditional: Walk through every aisle to find item #47392</p><p class="">G-Hash: Use a code system:</p><p class="">• Items 40000-49999 → Aisle 4</p><p class="">• Within aisle, shelves by hundreds</p><p class="">• Item #47392 → Aisle 4, Shelf 73</p><p class=" text-sm italic">Jump directly to the location instead of searching everywhere</p></div><div class="box box-green"><p class=" text-sm"><strong class="">Result:</strong> Extremely fast searches, both for building the index and finding matches</p></div>
+          </div>
+        </div>
+        <div class="slide " data-slide="20">
+          <h1>SAGA Method</h1>
+          
+          <div class="content">
+            <p class=" text-lg">Approximate matching with sophisticated distance calculation</p><div class="box box-yellow"><p class=" font-semibold">Facial Recognition Example:</p><p class="">Finding similar faces considers:</p><p class="">• <strong class="">StructDist:</strong> Face shape similarity</p><p class="">• <strong class="">Node Mismatches:</strong> Eye color different but close</p><p class="">• <strong class="">Node Gaps:</strong> Missing beard in one photo</p><p class=" text-sm italic">Combines multiple ways of measuring similarity to find the best matches even when photos aren't identical</p></div>
+          </div>
+        </div>
+        <div class="slide " data-slide="21">
+          <h1>TALE Method</h1>
+          
+          <div class="content">
+            <p class=" text-lg">Designed for MASSIVE databases using neighborhood indexing</p><div class="box box-cyan"><p class=" font-semibold">City Neighborhood Search:</p><p class="">Instead of searching all 8 million people in NYC:</p><p class="">• Index by neighborhoods (Manhattan, Brooklyn, etc.)</p><p class="">• Then by blocks within neighborhoods</p><p class="">• Looking for "coffee shops near Times Square"? Only search that small neighborhood</p><p class=" text-sm italic">TALE does this for graphs - indexes nodes by their immediate neighbors</p></div><div class="box box-purple"><p class=" text-sm"><strong class="">Perfect for:</strong> Billion-node graphs. Can even store index on disk (not just memory)</p></div>
+          </div>
+        </div>
+        <div class="slide " data-slide="22">
+          <h1>Comparison: Exact vs Similarity</h1>
+          
+          <div class="content">
+            <div class="box box-blue"><p class=" font-semibold">Exact Matching:</p><p class="">✓ 100% accurate results</p><p class="">✓ Perfect for small databases</p><p class="">✗ Very slow on big databases</p><p class=" text-sm italic">Like finding your exact house address</p></div><div class="box box-green"><p class=" font-semibold">Similarity Search:</p><p class="">✓ Much faster</p><p class="">✓ Works with messy/incomplete data</p><p class="">✓ Great for huge databases</p><p class="">✗ Results are "close" not "perfect"</p><p class=" text-sm italic">Like finding "houses in your general area"</p></div>
+          </div>
+        </div>
+        <div class="slide " data-slide="23">
+          <h1>Real-World Applications</h1>
+          
+          <div class="content">
+            <div class="box box-red"><p class=" font-semibold">🧬 Drug Discovery:</p><p class=" text-sm">Finding similar molecular structures that might work as medicines</p></div><div class="box box-blue"><p class=" font-semibold">👥 Social Networks:</p><p class=" text-sm">Friend recommendations, community detection</p></div><div class="box box-green"><p class=" font-semibold">🌐 Web Search:</p><p class=" text-sm">Understanding how web pages link to each other</p></div><div class="box box-purple"><p class=" font-semibold">🚗 Navigation:</p><p class=" text-sm">Finding best routes in road networks</p></div><div class="box box-yellow"><p class=" font-semibold">🔬 Protein Analysis:</p><p class=" text-sm">Comparing protein structures in biology research</p></div>
+          </div>
+        </div>
+        <div class="slide " data-slide="24">
+          <h1>Key Takeaways</h1>
+          
+          <div class="content">
+            <div class="box box-gradient"><p class=" font-semibold text-lg">Main Lessons:</p><div class=""><p class="">✓ <strong class="">Graphs model connected data</strong> (social networks, molecules, roads)</p><p class="">✓ <strong class="">Query processing = finding patterns</strong> in these connections</p><p class="">✓ <strong class="">Indexing = creating shortcuts</strong> to avoid checking everything</p><p class="">✓ <strong class="">Different techniques for different needs:</strong></p><p class="">• Small data → Exact matching works fine</p><p class="">• Big data → Need similarity search</p><p class="">• Simple patterns → Path-based indexing</p><p class="">• Complex patterns → Mining-based indexing</p></div></div>
+          </div>
+        </div>
+        <div class="slide " data-slide="25">
+          <h1>Thank You!</h1>
+          
+          <div class="content">
+            <div class=""><h2 class=" font-semibold">Questions?</h2><div class="box box-gradient2"><p class=" text-xl">Remember:</p><p class=" text-lg">Searching graphs is like finding needles in haystacks</p><p class=" text-lg">Indexing helps us organize the hay first!</p></div></div>
+          </div>
+        </div>
+    </div>
+    <div class="controls">
+        <div class="controls-inner">
+            <button class="btn btn-blue" onclick="prevSlide()" id="prevBtn">← Previous</button>
+            <span class="slide-counter" id="counter">Slide 1 of 26</span>
+            <button class="btn btn-blue" onclick="nextSlide()" id="nextBtn">Next →</button>
+        </div>
+    </div>
+    <script>
+        let currentSlide = 0;
+        const totalSlides = 26;
+        function updateSlide() {
+            document.querySelectorAll('.slide').forEach((s, i) => s.classList.toggle('active', i === currentSlide));
+            document.getElementById('counter').textContent = 'Slide ' + (currentSlide + 1) + ' of ' + totalSlides;
+            document.getElementById('prevBtn').disabled = currentSlide === 0;
+            document.getElementById('nextBtn').disabled = currentSlide === totalSlides - 1;
+        }
+        function nextSlide() { if (currentSlide < totalSlides - 1) { currentSlide++; updateSlide(); } }
+        function prevSlide() { if (currentSlide > 0) { currentSlide--; updateSlide(); } }
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') nextSlide();
+            if (e.key === 'ArrowLeft') prevSlide();
+        });
+        updateSlide();
+    </script>
+</body>
+</html>
